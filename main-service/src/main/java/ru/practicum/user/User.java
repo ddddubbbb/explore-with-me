@@ -1,4 +1,4 @@
-package ru.practicum.model;
+package ru.practicum.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -22,22 +21,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Entity
-@Table(name = "statistics")
-public class Hit {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String app;
+    private String name;
 
-    @Column(nullable = false)
-    private String uri;
-
-    @Column(nullable = false, length = 40)
-    private String ip;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp;
+    @Column(nullable = false, unique = true)
+    private String email;
 }
