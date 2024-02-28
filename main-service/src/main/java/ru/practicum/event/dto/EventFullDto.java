@@ -8,6 +8,8 @@ import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.location.dto.LocationDto;
 import ru.practicum.user.dto.UserShortDto;
 
+import javax.validation.constraints.PositiveOrZero;
+
 @Data
 @Builder
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class EventFullDto {
     private String eventDate;
     private LocationDto location;
     private boolean paid;
+    @PositiveOrZero
     private int participantLimit;
     private boolean requestModeration;
     private long confirmedRequests;

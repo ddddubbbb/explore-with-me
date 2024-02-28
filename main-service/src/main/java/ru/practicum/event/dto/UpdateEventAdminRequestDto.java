@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import ru.practicum.event.StateAdminAction;
 import ru.practicum.location.dto.LocationDto;
 
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 
 @Data
@@ -27,6 +28,7 @@ public class UpdateEventAdminRequestDto {
     private String eventDate;
     private LocationDto location;
     private Boolean paid;
+    @PositiveOrZero
     private Integer participantLimit;
     private Boolean requestModeration;
     private StateAdminAction stateAction;
