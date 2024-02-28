@@ -14,6 +14,7 @@ public class HitDto {
     private String uri;
     private String ip;
     private String timestamp;
+
     @Override
     public String toString() {
         return "HitDto{" +
