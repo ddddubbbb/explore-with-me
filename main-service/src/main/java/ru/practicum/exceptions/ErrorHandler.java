@@ -64,4 +64,12 @@ public class ErrorHandler {
         return new ApiError("FORBIDDEN", "For the requested operation the conditions are not met.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
+
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handlerOtherException(Throwable e) {
+        return new ApiError("INTERNAL SERVER ERROR", "An unexpected error has occurred.",
+                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
+    }
 }

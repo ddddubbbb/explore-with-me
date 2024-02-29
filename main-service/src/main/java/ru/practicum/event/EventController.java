@@ -25,6 +25,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Validated
 public class EventController {
     private final EventService eventService;
 
