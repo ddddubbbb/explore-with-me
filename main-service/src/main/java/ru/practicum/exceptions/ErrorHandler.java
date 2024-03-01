@@ -3,9 +3,11 @@ package ru.practicum.exceptions;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.category.CategoryController;
 import ru.practicum.compilation.CompilationController;
 import ru.practicum.event.EventController;
@@ -26,9 +28,11 @@ public class ErrorHandler {
 
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    @ExceptionHandler
+    @ExceptionHandler({MethodArgumentNotValidException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleValidationException(MethodArgumentNotValidException e) {
+    public ApiError handleValidationException(Exception e) {
         return new ApiError("BAD_REQUEST", "Incorrectly made request.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
