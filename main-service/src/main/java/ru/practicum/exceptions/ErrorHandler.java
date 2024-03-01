@@ -1,6 +1,7 @@
 package ru.practicum.exceptions;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -29,17 +30,11 @@ public class ErrorHandler {
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     @ExceptionHandler({MethodArgumentNotValidException.class,
+            ValidationRequestException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleValidationException(Exception e) {
-        return new ApiError("BAD_REQUEST", "Incorrectly made request.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleValidationException(ValidationRequestException e) {
         return new ApiError("BAD_REQUEST", "Incorrectly made request.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
@@ -55,20 +50,15 @@ public class ErrorHandler {
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({
+            DataIntegrityViolationException.class,
+            ConstraintViolationException.class,
+            ForbiddenException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleValidationException(ConstraintViolationException e) {
         return new ApiError("CONFLICT", "Integrity constraint has been violated.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleForbiddenException(ForbiddenException e) {
-        return new ApiError("FORBIDDEN", "For the requested operation the conditions are not met.",
-                e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
-    }
-
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
