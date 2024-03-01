@@ -34,7 +34,7 @@ public class ErrorHandler {
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ApiError handleValidationException(Exception e) {
+    public ApiError handlerIncorrectParametersException(Exception e) {
         return new ApiError("BAD_REQUEST", "Incorrectly made request.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
@@ -55,7 +55,7 @@ public class ErrorHandler {
             ConstraintViolationException.class,
             ForbiddenException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleValidationException(ConstraintViolationException e) {
+    public ApiError handleValidationException(Exception e) {
         return new ApiError("CONFLICT", "Integrity constraint has been violated.",
                 e.getMessage(), LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
     }
