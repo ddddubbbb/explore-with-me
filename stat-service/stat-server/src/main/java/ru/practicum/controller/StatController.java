@@ -25,7 +25,7 @@ public class StatController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addHit(@RequestBody HitDto hitDto) {
+    public void addItemRequest(@RequestBody HitDto hitDto) {
         log.info("Stat server: POST hit={}", hitDto);
         statService.addHit(hitDto);
     }
