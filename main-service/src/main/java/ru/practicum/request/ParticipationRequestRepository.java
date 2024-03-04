@@ -21,7 +21,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
 
     @Modifying
     @Query("update ParticipationRequest r set r.status = :newStatus where (r.event = :event and r.status = :searchStatus)")
-    void updateRequestStatusByEventIdAndStatus(@Param(value = "event") Event event,
+    void updateRequestStatusByEventIdAndStatus(Event event,
                                                @Param(value = "searchStatus") ParticipationRequestStatus searchStatus,
                                                @Param(value = "newStatus") ParticipationRequestStatus newStatus);
 }
