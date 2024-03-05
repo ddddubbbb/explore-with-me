@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import ru.practicum.event.Event;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
 
