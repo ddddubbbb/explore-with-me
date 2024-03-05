@@ -81,10 +81,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public List<ParticipationRequestDto> getParticipationRequests(Long userId) {
         log.info("Getting information about the current user's requests to participate in other people's events: user_id = " + userId);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        List<Optional<ParticipationRequest>> requests = participationRequestRepository.findByRequesterId(userId);
+        List<ParticipationRequest> requests = participationRequestRepository.findByRequesterId(userId);
         return requests.stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .map(ParticipationRequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
     }
@@ -95,10 +93,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
                 ", event_id = " + eventId);
         userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         List<Event> userEvents = eventRepository.findByIdAndInitiatorId(eventId, userId);
-        List<Optional<ParticipationRequest>> requests = participationRequestRepository.findByEventIn(userEvents);
+        List<ParticipationRequest> requests = participationRequestRepository.findByEventIn(userEvents);
         return requests.stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .map(ParticipationRequestMapper::toParticipationRequestDto)
                 .collect(Collectors.toList());
     }

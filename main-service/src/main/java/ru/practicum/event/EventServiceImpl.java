@@ -319,7 +319,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    private Integer getCountHits(HttpServletRequest request) {
+    private int getCountHits(HttpServletRequest request) {
         log.info("Client ip: {}", request.getRemoteAddr());
         log.info("Endpoint path: {}", request.getRequestURI());
         ResponseEntity<StatDto[]> response = statClient.getStats(
@@ -328,7 +328,7 @@ public class EventServiceImpl implements EventService {
                 new String[] {request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
-        Integer hits = 0;
+        int hits = 0;
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
             statDto = Arrays.stream(response.getBody()).findFirst();
             if (statDto.isPresent()) {
