@@ -55,13 +55,10 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
         log.info("Adding a new event: user_id = " + userId + ", event = " + newEventDto);
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        Category category = categoryRepository.findById(newEventDto.getCategory())
-                .orElseThrow(() -> new CategoryNotFoundException(newEventDto.getCategory()));
+        User user = userIdChecker(userId);
+        Category category = categoryIdChecker(newEventDto.getCategory());
         Event event = toEvent(newEventDto);
-        if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException("Cannot create the event, because less 2 hours before event datetime");
-        }
+        eventDateChecker(event.getEventDate());
         event.setCategory(category);
         event.setCreatedOn(LocalDateTime.now());
         event.setInitiator(user);
@@ -75,7 +72,7 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         log.info("Getting events added by the current user: user_id = " + userId + ", from = " + from +
                 ", size = " + size);
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        userIdChecker(userId);
         List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
         return events.stream()
                 .map(EventMapper::toEventShortDto)
@@ -86,25 +83,21 @@ public class EventServiceImpl implements EventService {
     public EventFullDto getEventById(Long userId, Long eventId) {
         log.info("Getting full information about the event added by the current user: user_id = " + userId +
                 ", event_id = " + eventId);
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        return toEventFullDto(eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException(eventId)));
+        userIdChecker(userId);
+        return toEventFullDto(eventIdChecker(eventId));
     }
 
     @Override
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserRequestDto updateEventUserRequestDto) {
         log.info("Updating event information: user_id = " + userId + ", event_id = " + eventId +
                 ", update_event = " + updateEventUserRequestDto);
-        userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        userIdChecker(userId);
+        Event event = eventIdChecker(eventId);
         if (event.getState() != null && event.getState() != EventState.PENDING && event.getState() != EventState.CANCELED) {
             throw new ForbiddenException("Only pending or canceled events can be changed");
         }
-        if (updateEventUserRequestDto.getEventDate() != null
-                && LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter)
-                .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(String.format("Event date must not be before 2 hours from current time. New value: %s",
-                    updateEventUserRequestDto.getEventDate()));
+        if (updateEventUserRequestDto.getEventDate() != null) {
+            eventDateChecker(LocalDateTime.parse(updateEventUserRequestDto.getEventDate(), formatter));
         }
         if (updateEventUserRequestDto.getTitle() != null) {
             event.setTitle(updateEventUserRequestDto.getTitle());
@@ -113,8 +106,8 @@ public class EventServiceImpl implements EventService {
             event.setAnnotation(updateEventUserRequestDto.getAnnotation());
         }
         if (updateEventUserRequestDto.getCategory() != null) {
-            event.setCategory(categoryRepository.findById(updateEventUserRequestDto.getCategory())
-                    .orElseThrow(() -> new CategoryNotFoundException(updateEventUserRequestDto.getCategory())));
+
+            event.setCategory(categoryIdChecker(updateEventUserRequestDto.getCategory()));
         }
         if (updateEventUserRequestDto.getDescription() != null) {
             event.setDescription(updateEventUserRequestDto.getDescription());
@@ -157,7 +150,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto updateEventByAdmin(Long eventId, UpdateEventAdminRequestDto updateEventAdminRequestDto) {
         log.info("updating information about the event by the administrator: event_id = " + eventId + ", update_event = " + updateEventAdminRequestDto);
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+        Event event = eventIdChecker(eventId);
         if (updateEventAdminRequestDto.getStateAction() != null) {
             if (updateEventAdminRequestDto.getStateAction() == StateAdminAction.PUBLISH_EVENT) {
                 if (event.getState() != EventState.PENDING) {
@@ -177,11 +170,8 @@ public class EventServiceImpl implements EventService {
                 }
             }
         }
-        if (updateEventAdminRequestDto.getEventDate() != null
-                && LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(), formatter)
-                .isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationRequestException(String.format("Event date must not be before 2 hours from current time. New value: %s",
-                    updateEventAdminRequestDto.getEventDate()));
+        if (updateEventAdminRequestDto.getEventDate() != null) {
+            eventDateChecker(LocalDateTime.parse(updateEventAdminRequestDto.getEventDate(), formatter));
         }
         if (updateEventAdminRequestDto.getTitle() != null) {
             event.setTitle(updateEventAdminRequestDto.getTitle());
@@ -190,8 +180,7 @@ public class EventServiceImpl implements EventService {
             event.setAnnotation(updateEventAdminRequestDto.getAnnotation());
         }
         if (updateEventAdminRequestDto.getCategory() != null) {
-            event.setCategory(categoryRepository.findById(updateEventAdminRequestDto.getCategory())
-                    .orElseThrow(() -> new CategoryNotFoundException(updateEventAdminRequestDto.getCategory())));
+            event.setCategory(categoryIdChecker(updateEventAdminRequestDto.getCategory()));
         }
         if (updateEventAdminRequestDto.getDescription() != null) {
             event.setDescription(updateEventAdminRequestDto.getDescription());
@@ -259,12 +248,12 @@ public class EventServiceImpl implements EventService {
             throw new ValidationRequestException("Date start is after date end.");
         }
         List<Event> events = eventRepository.findPublishedEvents(
-                    text,
-                    categories,
-                    paid,
-                    rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : LocalDateTime.now(),
-                    rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
-                    PageRequest.of(from / size, size));
+                text,
+                categories,
+                paid,
+                rangeStart != null ? LocalDateTime.parse(rangeStart, formatter) : LocalDateTime.now(),
+                rangeEnd != null ? LocalDateTime.parse(rangeEnd, formatter) : null,
+                PageRequest.of(from / size, size));
         List<EventShortDto> eventShortDtos = Collections.emptyList();
         if (events != null) {
             eventShortDtos = events.stream().map(EventMapper::toEventShortDto).collect(Collectors.toList());
@@ -281,7 +270,8 @@ public class EventServiceImpl implements EventService {
                     case VIEWS:
                         eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews));
                         break;
-                    default: throw new ValidationRequestException("Parameter sort is not valid");
+                    default:
+                        throw new ValidationRequestException("Parameter sort is not valid");
                 }
             }
         }
@@ -293,15 +283,15 @@ public class EventServiceImpl implements EventService {
         log.info("Getting information about a published event by ID: event_id = " + eventId);
         Event event = eventRepository.findByIdAndState(eventId, EventState.PUBLISHED)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
-        Integer countHits = getCountHits(request);
+        int countHits = getCountHits(request);
         statClient.addHit(HitDto.builder()
                 .app("ewm-main-service")
                 .uri(request.getRequestURI())
                 .ip(request.getRemoteAddr())
                 .timestamp(LocalDateTime.now().format(formatter))
                 .build());
-        Integer newCountHits = getCountHits(request);
-        if (newCountHits != null && newCountHits > countHits) {
+        int newCountHits = getCountHits(request);
+        if (newCountHits > countHits) {
             event.setViews(event.getViews() + 1);
             eventRepository.save(event);
         }
@@ -325,7 +315,7 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<StatDto[]> response = statClient.getStats(
                 LocalDateTime.now().minusYears(100).format(formatter),
                 LocalDateTime.now().format(formatter),
-                new String[] {request.getRequestURI()},
+                new String[]{request.getRequestURI()},
                 true);
         Optional<StatDto> statDto;
         int hits = 0;
@@ -336,5 +326,24 @@ public class EventServiceImpl implements EventService {
             }
         }
         return hits;
+    }
+
+    private void eventDateChecker(LocalDateTime eventDate) {
+        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ValidationRequestException("Event date must not be before 2 hours from current time.");
+        }
+    }
+
+    private Event eventIdChecker(Long eventId) {
+        return eventRepository.findById(eventId).orElseThrow(() -> new EventNotFoundException(eventId));
+    }
+
+    private User userIdChecker(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    }
+
+    private Category categoryIdChecker(Long catId) {
+        return categoryRepository.findById(catId)
+                .orElseThrow(() -> new CategoryNotFoundException(catId));
     }
 }
