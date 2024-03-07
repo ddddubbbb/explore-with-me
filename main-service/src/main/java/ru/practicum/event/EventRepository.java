@@ -25,12 +25,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             + "and (cast(:rangeStart AS timestamp) is null or e.event_date >= cast(:rangeStart AS timestamp))"
             + "and (cast(:rangeEnd AS timestamp) is null or e.event_date < cast(:rangeEnd AS timestamp))",
             nativeQuery = true)
-    List<Event> findEvents(@Param("userId") List<Long> userId,
-                           @Param("states") List<String> states,
-                           @Param("categories") List<Long> categories,
+    List<Event> findEvents(@Param("userId") List<Long> userId, List<String> states, List<Long> categories,
                            @Param("rangeStart") LocalDateTime rangeStart,
-                           @Param("rangeEnd") LocalDateTime rangeEnd,
-                           Pageable pageable);
+                           @Param("rangeEnd") LocalDateTime rangeEnd, Pageable pageable);
 
     @Query(value = "SELECT * FROM Events e WHERE (e.state = 'PUBLISHED') "
             + "and (:text is null or lower(e.annotation) LIKE lower(concat('%',cast(:text AS text),'%')) "
@@ -40,12 +37,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             + "and (e.event_date >= :rangeStart) "
             + "and (cast(:rangeEnd AS timestamp) is null or e.event_date < cast(:rangeEnd AS timestamp))",
             nativeQuery = true)
-    List<Event> findPublishedEvents(@Param("text") String text,
-                                  @Param("categories") List<Long> categories,
-                                  @Param("paid") Boolean paid,
-                                  @Param("rangeStart") LocalDateTime rangeStart,
-                                  @Param("rangeEnd") LocalDateTime rangeEnd,
-                                  Pageable pageable);
+    List<Event> findPublishedEvents(String text, List<Long> categories, Boolean paid,
+                                    @Param("rangeStart") LocalDateTime rangeStart,
+                                    @Param("rangeEnd") LocalDateTime rangeEnd, Pageable pageable);
 
     Optional<Event> findByIdAndState(Long eventId, EventState state);
 }
