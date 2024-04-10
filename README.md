@@ -1,6 +1,6 @@
 ### [Pull request на доп. функциональность - "комментарии к событиям."](https://github.com/ddddubbbb/java-explore-with-me/pull/3)
 
-# **ExploreWithMe**
+# **Исследуй со мной**
 Приложение, которое поможет найти компаньона для путешествия, похода в кино или другого совместного занятия.
 
 ![img](img/Explorewithme.png)
@@ -15,6 +15,16 @@
 
 2. Stat-service: [ewm-stats-service-spec.json](/ewm-stats-service-spec.json)
 </details>
+
+## Схема базы данных
+
+<details> <summary> ER-DIAGRAM </summary>
+
+![er-diagram](img/er_diagram.png)
+</details>
+
+## Этапы проектирования
+<details> <summary> ТЗ  </summary> 
 
 ## Этап 1. Сервис статистики
 <details> <summary> ТЗ. Часть 1 </summary> 
@@ -89,11 +99,4 @@
 Сам файл должен называться `feature.json`. Путь к файлу в репозитории
 должен быть `postman/feature.json`.
 </details> 
-
-
-## Схема базы данных:
-
-<details> <summary> ER-DIAGRAM </summary>
-
-![er-diagram](img/er_diagram.png)
 </details>
